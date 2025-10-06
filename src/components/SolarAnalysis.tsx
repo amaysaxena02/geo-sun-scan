@@ -115,18 +115,30 @@ const SolarAnalysis = () => {
     const L = (window as any).L;
     clearMapData();
 
-    // Add boundary
+    // Add boundary with enhanced styling
     if (data.boundary) {
-      boundaryRef.current = L.geoJSON(data.boundary, {
-        style: {
-          color: "#3b82f6",
-          weight: 3,
-          fillOpacity: 0.1,
-        },
-      }).addTo(mapInstanceRef.current);
+      try {
+        boundaryRef.current = L.geoJSON(data.boundary, {
+          style: {
+            color: "#3b82f6",
+            weight: 3,
+            fillColor: "#3b82f6",
+            fillOpacity: 0.15,
+            opacity: 0.8,
+          },
+        }).addTo(mapInstanceRef.current);
 
-      // Fit map to boundary
-      mapInstanceRef.current.fitBounds(boundaryRef.current.getBounds());
+        // Fit map to boundary with padding
+        const bounds = boundaryRef.current.getBounds();
+        mapInstanceRef.current.fitBounds(bounds, {
+          padding: [50, 50],
+          maxZoom: 16
+        });
+
+        console.log('Boundary added to map');
+      } catch (error) {
+        console.error('Error adding boundary:', error);
+      }
     }
 
     // Create custom icons
