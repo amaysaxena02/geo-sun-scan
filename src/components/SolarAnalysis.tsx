@@ -168,72 +168,40 @@ const SolarAnalysis = () => {
     }
 
     setLoading(true);
-    setStatus("Analyzing location...");
+    setStatus("Geocoding postcode...");
     setAnalysisData(null);
 
     try {
-      // TODO: Replace with actual API call to Lovable Cloud function
-      // const response = await fetch(`/api/analyze?postcode=${encodeURIComponent(postcode)}`);
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze`;
       
-      // For now, show a message that backend needs to be set up
-      setStatus("Backend integration required. Enable Lovable Cloud to connect external APIs.");
-      toast.info("Enable Lovable Cloud to analyze real locations!");
-      
-      // Demo data for visualization
-      const demoData: AnalysisData = {
-        boundary: {
-          type: "Feature",
-          geometry: {
-            type: "Polygon",
-            coordinates: [[
-              [-0.1278, 51.5074],
-              [-0.1178, 51.5074],
-              [-0.1178, 51.5174],
-              [-0.1278, 51.5174],
-              [-0.1278, 51.5074]
-            ]]
-          }
+      setStatus("Fetching location data...");
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        obstacles: {
-          buildings: [
-            { lat: 51.5094, lon: -0.1238 },
-            { lat: 51.5104, lon: -0.1248 },
-            { lat: 51.5084, lon: -0.1228 }
-          ],
-          trees: [
-            { lat: 51.5089, lon: -0.1258 },
-            { lat: 51.5099, lon: -0.1268 }
-          ],
-          poles: [
-            { lat: 51.5079, lon: -0.1218 }
-          ]
-        },
-        weather: [
-          { month: "January", temperature_2m_mean: 5.2, precipitation_sum: 55.3, sunshine_duration: 61.5 },
-          { month: "February", temperature_2m_mean: 5.8, precipitation_sum: 42.6, sunshine_duration: 78.2 },
-          { month: "March", temperature_2m_mean: 8.1, precipitation_sum: 45.1, sunshine_duration: 112.4 },
-          { month: "April", temperature_2m_mean: 10.9, precipitation_sum: 43.8, sunshine_duration: 165.3 },
-          { month: "May", temperature_2m_mean: 14.2, precipitation_sum: 51.2, sunshine_duration: 198.7 },
-          { month: "June", temperature_2m_mean: 17.1, precipitation_sum: 50.8, sunshine_duration: 204.5 },
-          { month: "July", temperature_2m_mean: 19.4, precipitation_sum: 44.5, sunshine_duration: 213.8 },
-          { month: "August", temperature_2m_mean: 19.0, precipitation_sum: 49.5, sunshine_duration: 198.2 },
-          { month: "September", temperature_2m_mean: 16.3, precipitation_sum: 49.1, sunshine_duration: 149.6 },
-          { month: "October", temperature_2m_mean: 12.6, precipitation_sum: 68.5, sunshine_duration: 107.8 },
-          { month: "November", temperature_2m_mean: 8.4, precipitation_sum: 64.4, sunshine_duration: 66.9 },
-          { month: "December", temperature_2m_mean: 6.0, precipitation_sum: 55.2, sunshine_duration: 51.2 }
-        ]
-      };
+        body: JSON.stringify({ postcode })
+      });
 
-      setTimeout(() => {
-        setAnalysisData(demoData);
-        updateMap(demoData);
-        setStatus("Analysis complete (demo data)");
-        setLoading(false);
-      }, 1500);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `HTTP error ${response.status}`);
+      }
+
+      setStatus("Analyzing obstacles and weather...");
+      const data: AnalysisData = await response.json();
+      
+      setAnalysisData(data);
+      updateMap(data);
+      setStatus(`Analysis complete for ${postcode}`);
+      toast.success("Location analyzed successfully!");
+      setLoading(false);
 
     } catch (error) {
-      setStatus("Error analyzing location");
-      toast.error("Failed to analyze location");
+      console.error('Analysis error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setStatus(`Error: ${errorMessage}`);
+      toast.error(`Failed to analyze location: ${errorMessage}`);
       setLoading(false);
     }
   };
