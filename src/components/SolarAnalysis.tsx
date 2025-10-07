@@ -312,35 +312,48 @@ const SolarAnalysis = () => {
               {/* Climate Data */}
               <Card className="p-4">
                 <h2 className="text-lg font-semibold mb-3 text-foreground">
-                  5-Year Climate Average
+                  Historical Climate Data
                 </h2>
-                <div className="max-h-[400px] overflow-y-auto">
-                  <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-card border-b border-border">
-                      <tr>
-                        <th className="text-left py-2 px-2 font-medium text-foreground">Month</th>
-                        <th className="text-right py-2 px-2 font-medium text-foreground">Temp (°C)</th>
-                        <th className="text-right py-2 px-2 font-medium text-foreground">Rain (mm)</th>
-                        <th className="text-right py-2 px-2 font-medium text-foreground">Sun (hrs)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {analysisData.weather.map((month, idx) => (
-                        <tr key={idx} className="border-b border-border last:border-0">
-                          <td className="py-2 px-2 text-foreground">{month.month}</td>
-                          <td className="py-2 px-2 text-right text-muted-foreground">
-                            {month.temperature_2m_mean.toFixed(1)}
-                          </td>
-                          <td className="py-2 px-2 text-right text-muted-foreground">
-                            {month.precipitation_sum.toFixed(1)}
-                          </td>
-                          <td className="py-2 px-2 text-right text-muted-foreground">
-                            {month.sunshine_duration.toFixed(1)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Based on 5-year historical average (2020-2025)
+                </p>
+                <div className="space-y-3">
+                  {/* Yearly repeating pattern for next 5 years */}
+                  {[2025, 2026, 2027, 2028, 2029].map((year) => (
+                    <div key={year} className="space-y-2">
+                      <h3 className="text-sm font-semibold text-foreground border-b border-border pb-1">
+                        {year}
+                      </h3>
+                      <div className="max-h-[300px] overflow-y-auto">
+                        <table className="w-full text-xs">
+                          <thead className="sticky top-0 bg-card">
+                            <tr className="border-b border-border">
+                              <th className="text-left py-1.5 px-2 font-medium text-foreground">Month</th>
+                              <th className="text-right py-1.5 px-2 font-medium text-foreground">Temp</th>
+                              <th className="text-right py-1.5 px-2 font-medium text-foreground">Rain</th>
+                              <th className="text-right py-1.5 px-2 font-medium text-foreground">Sun</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {analysisData.weather.map((month, idx) => (
+                              <tr key={`${year}-${idx}`} className="border-b border-border/50 last:border-0">
+                                <td className="py-1.5 px-2 text-foreground">{month.month}</td>
+                                <td className="py-1.5 px-2 text-right text-muted-foreground">
+                                  {month.temperature_2m_mean.toFixed(1)}°C
+                                </td>
+                                <td className="py-1.5 px-2 text-right text-muted-foreground">
+                                  {month.precipitation_sum.toFixed(1)}mm
+                                </td>
+                                <td className="py-1.5 px-2 text-right text-muted-foreground">
+                                  {month.sunshine_duration.toFixed(1)}h
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </Card>
             </div>
